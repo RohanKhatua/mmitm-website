@@ -343,9 +343,9 @@ export function LocationInput({
 					</div>
 
 					{showDropdown && predictions.length > 0 && (
-						<Card
+						<div
 							ref={dropdownRef}
-							className="absolute top-full left-0 right-0 mt-1 z-50 max-h-60 overflow-y-auto">
+							className="bg-white rounded-2xl border absolute top-full left-0 right-0 mt-1 z-50 max-h-60 overflow-y-auto">
 							{predictions.map((prediction) => (
 								<div
 									key={prediction.place_id}
@@ -361,7 +361,7 @@ export function LocationInput({
 									</div>
 								</div>
 							))}
-						</Card>
+						</div>
 					)}
 				</div>
 

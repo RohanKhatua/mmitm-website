@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Navigation } from "@/components/navigation";
 import { LocationInput } from "@/components/location-input";
-import { PreferencesForm } from "@/components/preferences-form";
+import { PreferencesBar } from "@/components/preferences-bar";
 import { RecommendationDisplay } from "@/components/recommendation-display";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -111,6 +111,12 @@ export default function InstantRecommendationsPage() {
 					</p>
 				</div>
 
+				{/* Preferences Bar */}
+				<PreferencesBar
+					preferences={preferences}
+					onPreferencesChange={setPreferences}
+				/>
+
 				<div className="grid lg:grid-cols-2 gap-8">
 					{/* Input Section */}
 					<div className="space-y-6">
@@ -157,19 +163,6 @@ export default function InstantRecommendationsPage() {
 										/>
 									</div>
 								))}
-							</CardContent>
-						</Card>
-
-						{/* Preferences */}
-						<Card>
-							<CardHeader>
-								<CardTitle>Preferences</CardTitle>
-							</CardHeader>
-							<CardContent>
-								<PreferencesForm
-									preferences={preferences}
-									onPreferencesChange={setPreferences}
-								/>
 							</CardContent>
 						</Card>
 
