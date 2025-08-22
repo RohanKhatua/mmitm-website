@@ -5,10 +5,17 @@ import type { CacheStatsResponse } from "@/lib/types";
 export async function GET(): Promise<NextResponse<CacheStatsResponse>> {
 	try {
 		const stats = GoogleApiCache.getStats();
+		const autocompleteContents = GoogleApiCache.getAutocompleteContents();
+		const placeDetailsContents = GoogleApiCache.getPlaceDetailsContents();
+		const geocodingContents = GoogleApiCache.getGeocodingContents();
 
 		return NextResponse.json({
-			stats,
-			message: "Cache statistics retrieved successfully",
+			stats: {
+				autocomplete: { ...stats.autocomplete, contents: autocompleteContents },
+				placeDetails: { ...stats.placeDetails, contents: placeDetailsContents },
+				geocoding: { ...stats.geocoding, contents: geocodingContents },
+			},
+			message: "Cache statistics and contents retrieved successfully",
 		});
 	} catch (error) {
 		console.error("Cache stats error:", error);

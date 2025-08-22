@@ -106,4 +106,19 @@ export class GoogleApiCache {
 			},
 		};
 	}
+
+	/**
+	 * Get cache contents
+	 */
+	static getAutocompleteContents(): Array<[string, any]> {
+		return autocompleteCache.dump();
+	}
+
+	static getPlaceDetailsContents(): Array<[string, any]> {
+		return placeDetailsCache.dump();
+	}
+
+	static getGeocodingContents(): Array<[string, any]> {
+		return geocodingCache.dump();
+	}
 }

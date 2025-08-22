@@ -220,16 +220,19 @@ export interface CacheStats {
 		size: number;
 		maxSize: number;
 		ttl: number;
+		contents?: Array<[string, any]>;
 	};
 	placeDetails: {
 		size: number;
 		maxSize: number;
 		ttl: number;
+		contents?: Array<[string, any]>;
 	};
 	geocoding: {
 		size: number;
 		maxSize: number;
 		ttl: number;
+		contents?: Array<[string, any]>;
 	};
 }
 

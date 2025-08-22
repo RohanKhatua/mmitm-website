@@ -91,6 +91,18 @@ export default function CacheStatsPage() {
             <p><strong>Size:</strong> {stats?.autocomplete.size ?? 'N/A'}</p>
             <p><strong>Max Size:</strong> {stats?.autocomplete.maxSize ?? 'N/A'}</p>
             <p><strong>TTL:</strong> {stats?.autocomplete.ttl ? `${stats.autocomplete.ttl / 1000 / 60} minutes` : 'N/A'}</p>
+            {stats?.autocomplete.contents && stats.autocomplete.contents.length > 0 && (
+              <div className="mt-4">
+                <h3 className="font-semibold">Contents:</h3>
+                <ul className="list-disc list-inside text-sm max-h-40 overflow-y-auto">
+                  {stats.autocomplete.contents.map(([key, value]) => (
+                    <li key={key}>
+                      <strong>{key}:</strong> {JSON.stringify(value)}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </CardContent>
         </Card>
         <Card>
@@ -101,6 +113,18 @@ export default function CacheStatsPage() {
             <p><strong>Size:</strong> {stats?.placeDetails.size ?? 'N/A'}</p>
             <p><strong>Max Size:</strong> {stats?.placeDetails.maxSize ?? 'N/A'}</p>
             <p><strong>TTL:</strong> {stats?.placeDetails.ttl ? `${stats.placeDetails.ttl / 1000 / 60} minutes` : 'N/A'}</p>
+            {stats?.placeDetails.contents && stats.placeDetails.contents.length > 0 && (
+              <div className="mt-4">
+                <h3 className="font-semibold">Contents:</h3>
+                <ul className="list-disc list-inside text-sm max-h-40 overflow-y-auto">
+                  {stats.placeDetails.contents.map(([key, value]) => (
+                    <li key={key}>
+                      <strong>{key}:</strong> {JSON.stringify(value)}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </CardContent>
         </Card>
         <Card>
@@ -111,6 +135,18 @@ export default function CacheStatsPage() {
             <p><strong>Size:</strong> {stats?.geocoding.size ?? 'N/A'}</p>
             <p><strong>Max Size:</strong> {stats?.geocoding.maxSize ?? 'N/A'}</p>
             <p><strong>TTL:</strong> {stats?.geocoding.ttl ? `${stats.geocoding.ttl / 1000 / 60} minutes` : 'N/A'}</p>
+            {stats?.geocoding.contents && stats.geocoding.contents.length > 0 && (
+              <div className="mt-4">
+                <h3 className="font-semibold">Contents:</h3>
+                <ul className="list-disc list-inside text-sm max-h-40 overflow-y-auto">
+                  {stats.geocoding.contents.map(([key, value]) => (
+                    <li key={key}>
+                      <strong>{key}:</strong> {JSON.stringify(value)}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
