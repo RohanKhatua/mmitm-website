@@ -9,7 +9,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
+
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,7 @@ import { X } from "lucide-react";
 import {
 	PlaceCategory,
 	TransportMode,
-	Preferences,
+ 
 	PreferencesFormProps,
 } from "@/lib/types";
 
@@ -45,7 +45,7 @@ const TRANSPORT_MODES: { value: TransportMode; label: string }[] = [
 
 export function PreferencesBar({
 	preferences,
-	onPreferencesChange,
+	onPreferencesChangeAction,
 }: PreferencesFormProps) {
 	const [limitInputValue, setLimitInputValue] = useState(
 		preferences.limit.toString()
@@ -61,7 +61,7 @@ export function PreferencesBar({
 			? [...preferences.categories, category]
 			: preferences.categories.filter((c) => c !== category);
 
-		onPreferencesChange({
+		onPreferencesChangeAction({
 			...preferences,
 			categories: newCategories,
 		});
@@ -82,7 +82,7 @@ export function PreferencesBar({
 	);
 
 	return (
-		<div className="flex flex-wrap items-center gap-4 mb-6">
+		<div className="flex flex-wrap items-center gap-4 mb-6 p-4 bg-card rounded-xl shadow-lg">
 			{/* Selected Categories */}
 			<div className="flex items-center gap-2">
 				<Label className="text-sm font-medium whitespace-nowrap">
@@ -143,7 +143,7 @@ export function PreferencesBar({
 				<Select
 					value={preferences.transportMode}
 					onValueChange={(value) =>
-						onPreferencesChange({
+						onPreferencesChangeAction({
 							...preferences,
 							transportMode: value as TransportMode,
 						})
@@ -181,7 +181,7 @@ export function PreferencesBar({
 						// Only update preferences if it's a valid number
 						const numValue = Number.parseInt(value);
 						if (!isNaN(numValue) && numValue >= 1 && numValue <= 20) {
-							onPreferencesChange({
+							onPreferencesChangeAction({
 								...preferences,
 								limit: numValue,
 							});
@@ -193,7 +193,7 @@ export function PreferencesBar({
 						if (value === "" || isNaN(Number.parseInt(value))) {
 							const resetValue = preferences.limit || 10;
 							setLimitInputValue(resetValue.toString());
-							onPreferencesChange({
+							onPreferencesChangeAction({
 								...preferences,
 								limit: resetValue,
 							});

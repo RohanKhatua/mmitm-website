@@ -258,7 +258,7 @@ export interface Preferences {
 
 export interface PreferencesFormProps {
 	preferences: Preferences;
-	onPreferencesChange: (preferences: Preferences) => void;
+	onPreferencesChangeAction: (preferences: Preferences) => void;
 }
 
 export interface ConnectionStatusProps {

@@ -5,8 +5,8 @@ import type React from "react";
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { MapPin, Loader2, Navigation } from "lucide-react";
+
+import { MapPin, Loader2, Navigation, X } from "lucide-react";
 import type {
 	ParticipantInput,
 	LocationData,
@@ -15,7 +15,7 @@ import type {
 
 interface LocationInputProps {
 	// New interface for compatibility with existing code
-	onLocationSelected?: (location: ParticipantInput) => void;
+	onLocationSelected?: (location: ParticipantInput | null) => void;
 	currentLocation?: ParticipantInput | null;
 	// Optional new interface for more detailed data
 	onLocationSelect?: (location: LocationData) => void;
@@ -320,28 +320,25 @@ export function LocationInput({
 
 	return (
 		<div className={`relative w-full ${className}`}>
-			<div className="flex gap-2">
+			<div className="flex gap-2 items-center">
 				<div className="relative flex-1">
-					<div className="relative">
-						<MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-						<Input
-							ref={inputRef}
-							type="text"
-							placeholder={placeholder}
-							value={query}
-							onChange={handleInputChange}
-							onFocus={() => {
-								if (query && !hasSelectedPlace && predictions.length > 0) {
-									setShowDropdown(true);
-								}
-							}}
-							className="pl-10 pr-4"
-						/>
-						{isLoading && (
-							<Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
-						)}
-					</div>
-
+					<MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+					<Input
+						ref={inputRef}
+						type="text"
+						placeholder={placeholder}
+						value={query}
+						onChange={handleInputChange}
+						onFocus={() => {
+							if (query && !hasSelectedPlace && predictions.length > 0) {
+								setShowDropdown(true);
+							}
+						}}
+						className="pl-10 pr-4"
+					/>
+					{isLoading && (
+						<Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+					)}
 					{showDropdown && predictions.length > 0 && (
 						<div
 							ref={dropdownRef}
@@ -364,7 +361,21 @@ export function LocationInput({
 						</div>
 					)}
 				</div>
-
+				{(currentLocation || (query && hasSelectedPlace)) && (
+					<Button
+						type="button"
+						variant="outline"
+						size="icon"
+						onClick={() => {
+							setQuery("");
+							setSelectedLocation(null);
+							setHasSelectedPlace(false);
+							onLocationSelected?.(null);
+						}}
+						className="h-10 w-10 p-0 text-muted-foreground hover:bg-destructive hover:border-destructive">
+						<X className="h-4 w-4" />
+					</Button>
+				)}
 				<Button
 					type="button"
 					variant="outline"

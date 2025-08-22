@@ -114,7 +114,7 @@ export default function InstantRecommendationsPage() {
 				{/* Preferences Bar */}
 				<PreferencesBar
 					preferences={preferences}
-					onPreferencesChange={setPreferences}
+					onPreferencesChangeAction={setPreferences}
 				/>
 
 				<div className="grid lg:grid-cols-2 gap-8">
