@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -199,41 +199,44 @@ export function LocationInput({
 	};
 
 	// Fetch place predictions from our API endpoint
-	const fetchPredictions = async (input: string) => {
-		if (!input.trim()) {
-			setPredictions([]);
-			setShowDropdown(false);
-			return;
-		}
-
-		setIsLoading(true);
-
-		try {
-			const response = await fetch("/api/places/autocomplete", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({ input }),
-			});
-
-			const data = await response.json();
-
-			if (!response.ok) {
-				throw new Error(data.error || "Failed to fetch predictions");
+	const fetchPredictions = useCallback(
+		async (input: string) => {
+			if (!input.trim()) {
+				setPredictions([]);
+				setShowDropdown(false);
+				return;
 			}
 
-			setPredictions(data.predictions || []);
-			if (!hasSelectedPlace) {
-				setShowDropdown(true);
-			}
-		} catch (error) {
-			console.error("Error fetching predictions:", error);
-			setPredictions([]);
-		}
+			setIsLoading(true);
 
-		setIsLoading(false);
-	};
+			try {
+				const response = await fetch("/api/places/autocomplete", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({ input }),
+				});
+
+				const data = await response.json();
+
+				if (!response.ok) {
+					throw new Error(data.error || "Failed to fetch predictions");
+				}
+
+				setPredictions(data.predictions || []);
+				if (!hasSelectedPlace) {
+					setShowDropdown(true);
+				}
+			} catch (error) {
+				console.error("Error fetching predictions:", error);
+				setPredictions([]);
+			}
+
+			setIsLoading(false);
+		},
+		[hasSelectedPlace]
+	);
 
 	// Get place details (lat/lng) from place ID using our API endpoint
 	const getPlaceDetails = async (placeId: string, description: string) => {
@@ -290,7 +293,7 @@ export function LocationInput({
 		}, 300);
 
 		return () => clearTimeout(timeoutId);
-	}, [query, isSettingQuery]);
+	}, [query, isSettingQuery, fetchPredictions]);
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const newValue = e.target.value;

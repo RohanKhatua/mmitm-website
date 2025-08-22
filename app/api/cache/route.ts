@@ -2,9 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { GoogleApiCache } from "@/lib/cache";
 import type { CacheStatsResponse } from "@/lib/types";
 
-export async function GET(
-	request: NextRequest
-): Promise<NextResponse<CacheStatsResponse>> {
+export async function GET(): Promise<NextResponse<CacheStatsResponse>> {
 	try {
 		const stats = GoogleApiCache.getStats();
 

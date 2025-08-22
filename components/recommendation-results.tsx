@@ -176,8 +176,8 @@ export function RecommendationResults({
 						<div className="text-center py-8 text-gray-500">
 							<MapPin className="h-12 w-12 mx-auto mb-4 text-gray-300" />
 							<p>
-								Add participant locations and click "Get Recommendations" to see
-								venues.
+								Add participant locations and click &quot;Get Recommendations&quot; to see
+								venues.&rdquo;
 							</p>
 						</div>
 					</CardContent>

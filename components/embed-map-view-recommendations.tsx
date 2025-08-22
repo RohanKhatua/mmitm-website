@@ -7,6 +7,7 @@ import React, {
 	useRef,
 	useEffect,
 } from "react";
+import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -335,11 +336,12 @@ export function EmbedMapViewRecommendations({
 				<div className="w-full h-[400px] relative">
 					{mapMode === "overview" && staticMapUrl ? (
 						// Static map showing venues and participants with markers
-						<img
+						<Image
 							src={staticMapUrl}
 							alt="Map showing venue recommendations and participant locations"
-							className="w-full h-full object-cover rounded-lg"
-							style={{ border: 0 }}
+							fill
+							style={{ objectFit: "cover" }}
+							className="rounded-lg"
 						/>
 					) : (
 						// Interactive embed map

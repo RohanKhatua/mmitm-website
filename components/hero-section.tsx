@@ -13,7 +13,7 @@ export function HeroSection() {
           </h1>
 
           <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-            Collaborate seamlessly with instant recommendations tailored to your team's needs. Smart location-based
+            Collaborate seamlessly with instant recommendations tailored to your team&apos;s needs. Smart location-based
             planning that saves time and brings people together.
           </p>
 

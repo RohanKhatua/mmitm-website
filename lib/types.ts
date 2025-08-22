@@ -215,8 +215,26 @@ export interface PlaceDetailsResponse {
 	error?: string;
 }
 
+export interface CacheStats {
+	autocomplete: {
+		size: number;
+		maxSize: number;
+		ttl: number;
+	};
+	placeDetails: {
+		size: number;
+		maxSize: number;
+		ttl: number;
+	};
+	geocoding: {
+		size: number;
+		maxSize: number;
+		ttl: number;
+	};
+}
+
 export interface CacheStatsResponse {
-	stats?: any;
+	stats?: CacheStats;
 	message?: string;
 	error?: string;
 }
