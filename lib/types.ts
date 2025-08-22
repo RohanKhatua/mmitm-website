@@ -234,6 +234,12 @@ export interface CacheStats {
 		ttl: number;
 		contents?: Array<[string, any]>;
 	};
+	recommendations: {
+		size: number;
+		maxSize: number;
+		ttl: number;
+		contents?: Array<[string, any]>;
+	};
 }
 
 export interface CacheStatsResponse {

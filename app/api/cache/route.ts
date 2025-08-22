@@ -8,12 +8,14 @@ export async function GET(): Promise<NextResponse<CacheStatsResponse>> {
 		const autocompleteContents = GoogleApiCache.getAutocompleteContents();
 		const placeDetailsContents = GoogleApiCache.getPlaceDetailsContents();
 		const geocodingContents = GoogleApiCache.getGeocodingContents();
+		const recommendationsContents = GoogleApiCache.getRecommendationsContents();
 
 		return NextResponse.json({
 			stats: {
 				autocomplete: { ...stats.autocomplete, contents: autocompleteContents },
 				placeDetails: { ...stats.placeDetails, contents: placeDetailsContents },
 				geocoding: { ...stats.geocoding, contents: geocodingContents },
+				recommendations: { ...stats.recommendations, contents: recommendationsContents },
 			},
 			message: "Cache statistics and contents retrieved successfully",
 		});

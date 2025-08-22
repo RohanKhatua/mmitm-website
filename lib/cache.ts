@@ -5,12 +5,14 @@ const CACHE_TTL = {
 	AUTOCOMPLETE: 5 * 60 * 1000, // 5 minutes for autocomplete suggestions
 	PLACE_DETAILS: 30 * 60 * 1000, // 30 minutes for place details (locations rarely change)
 	GEOCODING: 60 * 60 * 1000, // 1 hour for reverse geocoding (addresses rarely change)
+	RECOMMENDATIONS: 10 * 60 * 1000, // 10 minutes for recommendations
 } as const;
 
 const CACHE_MAX_SIZE = {
 	AUTOCOMPLETE: 500, // Keep up to 500 autocomplete queries
 	PLACE_DETAILS: 1000, // Keep up to 1000 place details
 	GEOCODING: 200, // Keep up to 200 geocoding results
+	RECOMMENDATIONS: 100, // Keep up to 100 recommendation sets
 } as const;
 
 // Create separate caches for different API types
@@ -27,6 +29,11 @@ const placeDetailsCache = new LRUCache<string, any>({
 const geocodingCache = new LRUCache<string, any>({
 	max: CACHE_MAX_SIZE.GEOCODING,
 	ttl: CACHE_TTL.GEOCODING,
+});
+
+const recommendationsCache = new LRUCache<string, any>({
+	max: CACHE_MAX_SIZE.RECOMMENDATIONS,
+	ttl: CACHE_TTL.RECOMMENDATIONS,
 });
 
 export class GoogleApiCache {
@@ -76,18 +83,29 @@ export class GoogleApiCache {
 	}
 
 	/**
+	 * Cache recommendations results
+	 */
+	static getRecommendations(key: string): any | null {
+		return recommendationsCache.get(key) || null;
+	}
+
+	static setRecommendations(key: string, data: any): void {
+		recommendationsCache.set(key, data);
+	}
+
+	/**
 	 * Clear all caches (useful for debugging or manual cache invalidation)
 	 */
 	static clearAll(): void {
 		autocompleteCache.clear();
 		placeDetailsCache.clear();
 		geocodingCache.clear();
+		recommendationsCache.clear();
 	}
 
 	/**
 	 * Get cache statistics
-	 */
-	static getStats() {
+	 */	static getStats() {
 		return {
 			autocomplete: {
 				size: autocompleteCache.size,
@@ -103,6 +121,11 @@ export class GoogleApiCache {
 				size: geocodingCache.size,
 				maxSize: CACHE_MAX_SIZE.GEOCODING,
 				ttl: CACHE_TTL.GEOCODING,
+			},
+			recommendations: {
+				size: recommendationsCache.size,
+				maxSize: CACHE_MAX_SIZE.RECOMMENDATIONS,
+				ttl: CACHE_TTL.RECOMMENDATIONS,
 			},
 		};
 	}
@@ -120,5 +143,9 @@ export class GoogleApiCache {
 
 	static getGeocodingContents(): Array<[string, any]> {
 		return geocodingCache.dump();
+	}
+
+	static getRecommendationsContents(): Array<[string, any]> {
+		return recommendationsCache.dump();
 	}
 }

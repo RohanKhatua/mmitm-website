@@ -3,6 +3,7 @@ import {
 	makeBackendRequest,
 	handleBackendResponse,
 } from "@/lib/backend-config";
+import { GoogleApiCache } from "@/lib/cache";
 
 // API endpoint that proxies to the Rust backend for instant recommendations
 export async function POST(request: NextRequest) {
@@ -29,6 +30,25 @@ export async function POST(request: NextRequest) {
 			);
 		}
 
+		// Create a consistent cache key from the request parameters
+		const cacheKey = JSON.stringify({
+			participants: participants.sort((a: any, b: any) => {
+				// Sort participants for consistent cache key
+				if (a.lat && b.lat) return a.lat - b.lat;
+				return 0;
+			}),
+			categories: categories.sort(), // Sort categories for consistent cache key
+			transport_mode: transport_mode || "DRIVE",
+			limit: limit || 10,
+		});
+
+		// Check cache first
+		const cachedResult = GoogleApiCache.getRecommendations(cacheKey);
+		if (cachedResult) {
+			console.log("Cache hit for recommendations");
+			return NextResponse.json(cachedResult);
+		}
+
 		// Call the backend API
 		const response = await makeBackendRequest("/recommendations", {
 			method: "POST",
@@ -41,6 +61,11 @@ export async function POST(request: NextRequest) {
 		});
 
 		const recommendations = await handleBackendResponse(response);
+
+		// Cache the successful response
+		GoogleApiCache.setRecommendations(cacheKey, recommendations);
+		console.log("Cached recommendations");
+
 		return NextResponse.json(recommendations);
 	} catch (error) {
 		console.error("Error processing recommendations request:", error);
