@@ -17,12 +17,17 @@ import {
 	ExternalLink,
 	MapPin,
 	Users,
+	Share,
+	CheckCircle2,
+	AlertCircle,
 } from "lucide-react";
 import type {
 	EnhancedVenueRecommendation,
 	ParticipantLocationWithId,
 	VenueDetailModalProps,
 } from "@/lib/types";
+import { shareVenue } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 export function VenueDetailModal({
 	venue,
@@ -30,6 +35,7 @@ export function VenueDetailModal({
 	isOpen,
 	onClose,
 }: VenueDetailModalProps) {
+	const { toast } = useToast();
 	if (!venue) return null;
 
 	const getPriceLevelDisplay = (priceLevel?: string) => {
@@ -202,7 +208,7 @@ export function VenueDetailModal({
 					</div>
 
 					{/* Action Buttons */}
-					<div className="flex space-x-3">
+					<div className="flex flex-wrap gap-3">
 						<Button
 							onClick={() => window.open(venue.google_maps_url, "_blank")}
 							className="flex-1">
@@ -219,6 +225,29 @@ export function VenueDetailModal({
 							className="flex-1">
 							<MapPin className="h-4 w-4 mr-2" />
 							Get Directions
+						</Button>
+						<Button
+							variant="secondary"
+							onClick={async () => {
+								const success = await shareVenue(venue);
+								if (success) {
+									toast({
+										title: "Venue shared",
+										description:
+											"Venue information has been copied to clipboard",
+										variant: "default",
+									});
+								} else {
+									toast({
+										title: "Share failed",
+										description: "Unable to share venue information",
+										variant: "destructive",
+									});
+								}
+							}}
+							className="flex-1">
+							<Share className="h-4 w-4 mr-2" />
+							Share Venue
 						</Button>
 					</div>
 				</div>

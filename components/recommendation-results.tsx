@@ -13,12 +13,17 @@ import {
 	ExternalLink,
 	TrendingUp,
 	Award,
+	Share,
+	CheckCircle2,
+	AlertCircle,
 } from "lucide-react";
 import {
 	ParticipantLocationWithId,
 	EnhancedVenueRecommendation,
 	FilterOptions,
 } from "@/lib/types";
+import { shareVenue } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 interface RecommendationResultsProps {
 	recommendations: EnhancedVenueRecommendation[];
@@ -31,6 +36,7 @@ export function RecommendationResults({
 	participants,
 	isLoading,
 }: RecommendationResultsProps) {
+	const { toast } = useToast();
 	const [selectedVenue, setSelectedVenue] =
 		useState<EnhancedVenueRecommendation | null>(null);
 	const [filters, setFilters] = useState<FilterOptions>({
@@ -176,8 +182,8 @@ export function RecommendationResults({
 						<div className="text-center py-8 text-gray-500">
 							<MapPin className="h-12 w-12 mx-auto mb-4 text-gray-300" />
 							<p>
-								Add participant locations and click &quot;Get Recommendations&quot; to see
-								venues.&rdquo;
+								Add participant locations and click &quot;Get
+								Recommendations&quot; to see venues.&rdquo;
 							</p>
 						</div>
 					</CardContent>
@@ -362,7 +368,7 @@ export function RecommendationResults({
 										</div>
 
 										{/* Action Buttons */}
-										<div className="flex space-x-2">
+										<div className="flex flex-wrap gap-2">
 											<Button
 												onClick={() => setSelectedVenue(venue)}
 												variant="outline"
@@ -379,6 +385,30 @@ export function RecommendationResults({
 												className="flex-1">
 												<ExternalLink className="h-4 w-4 mr-2" />
 												View on Maps
+											</Button>
+											<Button
+												onClick={async () => {
+													const success = await shareVenue(venue);
+													if (success) {
+														toast({
+															title: "Venue shared",
+															description:
+																"Venue information has been copied to clipboard",
+															variant: "default",
+														});
+													} else {
+														toast({
+															title: "Share failed",
+															description: "Unable to share venue information",
+															variant: "destructive",
+														});
+													}
+												}}
+												variant="secondary"
+												size="sm"
+												className="flex-1">
+												<Share className="h-4 w-4 mr-2" />
+												Share
 											</Button>
 										</div>
 									</CardContent>
