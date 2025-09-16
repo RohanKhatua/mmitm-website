@@ -16,13 +16,19 @@ import {
 	Share,
 	CheckCircle2,
 	AlertCircle,
+	Copy,
 } from "lucide-react";
 import {
 	ParticipantLocationWithId,
 	EnhancedVenueRecommendation,
 	FilterOptions,
 } from "@/lib/types";
-import { shareVenue, shareRecommendationSet } from "@/lib/utils";
+import {
+	shareVenue,
+	shareRecommendationSet,
+	copyRecommendationSetToClipboard,
+	copyVenueToClipboard,
+} from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
 interface RecommendationResultsProps {
@@ -234,7 +240,7 @@ export function RecommendationResults({
 
 			{/* Results */}
 			<Card>
-				<CardHeader className="flex flex-row items-center justify-between space-x-2">
+				<CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between md:space-x-2 space-y-4 md:space-y-0">
 					<CardTitle>
 						Venue Recommendations ({filteredRecommendations.length}
 						{filteredRecommendations.length !== recommendations.length &&
@@ -242,33 +248,63 @@ export function RecommendationResults({
 						)
 					</CardTitle>
 					{filteredRecommendations.length > 0 && (
-						<Button
-							variant="secondary"
-							size="sm"
-							onClick={async () => {
-								const success = await shareRecommendationSet(
-									filteredRecommendations,
-									sessionId
-								);
-								if (success) {
-									toast({
-										title: "Recommendations shared",
-										description:
-											"The list of recommendations has been copied to clipboard",
-										variant: "default",
-									});
-								} else {
-									toast({
-										title: "Share failed",
-										description: "Unable to share recommendations",
-										variant: "destructive",
-									});
-								}
-							}}
-							className="flex items-center gap-1 whitespace-nowrap">
-							<Share className="h-4 w-4 mr-1" />
-							Share All
-						</Button>
+						<div className="flex items-center gap-2">
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={async () => {
+									const success = await copyRecommendationSetToClipboard(
+										filteredRecommendations,
+										sessionId
+									);
+									if (success) {
+										toast({
+											title: "Copied to clipboard",
+											description:
+												"The list of recommendations has been copied to clipboard",
+											variant: "default",
+										});
+									} else {
+										toast({
+											title: "Copy failed",
+											description: "Unable to copy recommendations",
+											variant: "destructive",
+										});
+									}
+								}}
+								className="flex items-center gap-1 whitespace-nowrap">
+								<Copy className="h-4 w-4 mr-1" />
+								<span className="md:inline hidden">Copy List</span>
+								<span className="md:hidden inline">Copy</span>
+							</Button>
+							<Button
+								variant="secondary"
+								size="sm"
+								onClick={async () => {
+									const success = await shareRecommendationSet(
+										filteredRecommendations,
+										sessionId
+									);
+									if (success) {
+										toast({
+											title: "Recommendations shared",
+											description: "Recommendations shared successfully",
+											variant: "default",
+										});
+									} else {
+										toast({
+											title: "Share failed",
+											description: "Unable to share recommendations",
+											variant: "destructive",
+										});
+									}
+								}}
+								className="flex items-center gap-1 whitespace-nowrap">
+								<Share className="h-4 w-4 mr-1" />
+								<span className="md:inline hidden">Share All</span>
+								<span className="md:hidden inline">Share</span>
+							</Button>
+						</div>
 					)}
 				</CardHeader>
 				<CardContent>
@@ -419,12 +455,35 @@ export function RecommendationResults({
 											</Button>
 											<Button
 												onClick={async () => {
+													const success = await copyVenueToClipboard(venue);
+													if (success) {
+														toast({
+															title: "Copied to clipboard",
+															description:
+																"Venue information has been copied to clipboard",
+															variant: "default",
+														});
+													} else {
+														toast({
+															title: "Copy failed",
+															description: "Unable to copy venue information",
+															variant: "destructive",
+														});
+													}
+												}}
+												variant="outline"
+												size="sm"
+												className="flex-1">
+												<Copy className="h-4 w-4 mr-2" />
+												Copy
+											</Button>
+											<Button
+												onClick={async () => {
 													const success = await shareVenue(venue);
 													if (success) {
 														toast({
 															title: "Venue shared",
-															description:
-																"Venue information has been copied to clipboard",
+															description: "Venue shared successfully",
 															variant: "default",
 														});
 													} else {

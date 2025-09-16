@@ -20,13 +20,14 @@ import {
 	Share,
 	CheckCircle2,
 	AlertCircle,
+	Copy,
 } from "lucide-react";
 import type {
 	EnhancedVenueRecommendation,
 	ParticipantLocationWithId,
 	VenueDetailModalProps,
 } from "@/lib/types";
-import { shareVenue } from "@/lib/utils";
+import { shareVenue, copyVenueToClipboard } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
 export function VenueDetailModal({
@@ -227,14 +228,36 @@ export function VenueDetailModal({
 							Get Directions
 						</Button>
 						<Button
+							variant="outline"
+							onClick={async () => {
+								const success = await copyVenueToClipboard(venue);
+								if (success) {
+									toast({
+										title: "Copied to clipboard",
+										description:
+											"Venue information has been copied to clipboard",
+										variant: "default",
+									});
+								} else {
+									toast({
+										title: "Copy failed",
+										description: "Unable to copy venue information",
+										variant: "destructive",
+									});
+								}
+							}}
+							className="flex-1">
+							<Copy className="h-4 w-4 mr-2" />
+							Copy Info
+						</Button>
+						<Button
 							variant="secondary"
 							onClick={async () => {
 								const success = await shareVenue(venue);
 								if (success) {
 									toast({
 										title: "Venue shared",
-										description:
-											"Venue information has been copied to clipboard",
+										description: "Venue shared successfully",
 										variant: "default",
 									});
 								} else {
