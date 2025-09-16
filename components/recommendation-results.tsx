@@ -523,6 +523,21 @@ export function RecommendationResults({
 								</div>
 							</Carousel>
 						</div>
+					) : viewMode === "list" ? (
+						<div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2 scrollbar-thin">
+							{filteredRecommendations.map((venue, index) =>
+								renderVenueCard(venue, index)
+							)}
+							{filteredRecommendations.length === 0 && (
+								<div className="text-center py-8 text-gray-500">
+									<MapPin className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+									<p>
+										No venues match your current filters. Try adjusting your
+										criteria.
+									</p>
+								</div>
+							)}
+						</div>
 					) : (
 						<div className="space-y-4">
 							{filteredRecommendations.map((venue, index) =>
