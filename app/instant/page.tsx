@@ -189,6 +189,7 @@ export default function InstantRecommendationsPage() {
 							recommendations={recommendations}
 							participants={participants}
 							isLoading={isLoading}
+							sessionId={undefined}
 						/>
 					</div>
 				</div>

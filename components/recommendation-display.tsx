@@ -18,6 +18,7 @@ export function RecommendationDisplay({
 	recommendations,
 	participants,
 	isLoading,
+	sessionId,
 }: RecommendationDisplayProps) {
 	const [viewMode, setViewMode] = useState<ViewMode>("list");
 
@@ -50,6 +51,7 @@ export function RecommendationDisplay({
 						recommendations={recommendations}
 						participants={participants}
 						isLoading={isLoading}
+						sessionId={sessionId}
 					/>
 				)}
 				{viewMode === "map" && (

@@ -241,7 +241,7 @@ export function SessionLobby({
 						</CardHeader>
 						<CardContent>
 							<LocationInput
-								onLocationSelected={updateLocation}
+								onLocationSelect={updateLocation}
 								currentLocation={currentUser.location}
 							/>
 							{isUpdatingLocation && (
@@ -333,6 +333,7 @@ export function SessionLobby({
 						location: p.location,
 					}))}
 					isLoading={isGeneratingRecommendations}
+					sessionId={session.id}
 				/>
 			)}
 		</div>

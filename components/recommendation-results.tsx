@@ -22,19 +22,21 @@ import {
 	EnhancedVenueRecommendation,
 	FilterOptions,
 } from "@/lib/types";
-import { shareVenue } from "@/lib/utils";
+import { shareVenue, shareRecommendationSet } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
 interface RecommendationResultsProps {
 	recommendations: EnhancedVenueRecommendation[];
 	participants: ParticipantLocationWithId[];
 	isLoading: boolean;
+	sessionId?: string;
 }
 
 export function RecommendationResults({
 	recommendations,
 	participants,
 	isLoading,
+	sessionId,
 }: RecommendationResultsProps) {
 	const { toast } = useToast();
 	const [selectedVenue, setSelectedVenue] =
@@ -232,13 +234,42 @@ export function RecommendationResults({
 
 			{/* Results */}
 			<Card>
-				<CardHeader>
+				<CardHeader className="flex flex-row items-center justify-between space-x-2">
 					<CardTitle>
 						Venue Recommendations ({filteredRecommendations.length}
 						{filteredRecommendations.length !== recommendations.length &&
 							` of ${recommendations.length}`}
 						)
 					</CardTitle>
+					{filteredRecommendations.length > 0 && (
+						<Button
+							variant="secondary"
+							size="sm"
+							onClick={async () => {
+								const success = await shareRecommendationSet(
+									filteredRecommendations,
+									sessionId
+								);
+								if (success) {
+									toast({
+										title: "Recommendations shared",
+										description:
+											"The list of recommendations has been copied to clipboard",
+										variant: "default",
+									});
+								} else {
+									toast({
+										title: "Share failed",
+										description: "Unable to share recommendations",
+										variant: "destructive",
+									});
+								}
+							}}
+							className="flex items-center gap-1 whitespace-nowrap">
+							<Share className="h-4 w-4 mr-1" />
+							Share All
+						</Button>
+					)}
 				</CardHeader>
 				<CardContent>
 					<div className="space-y-4">

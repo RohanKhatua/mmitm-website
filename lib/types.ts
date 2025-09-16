@@ -268,6 +268,7 @@ export interface RecommendationDisplayProps {
 	recommendations: EnhancedVenueRecommendation[];
 	participants: ParticipantLocationWithId[];
 	isLoading: boolean;
+	sessionId?: string;
 }
 
 export interface VenueDetailModalProps {
