@@ -249,7 +249,7 @@ export interface CacheStatsResponse {
 }
 
 // UI Component types
-export type ViewMode = "list" | "map";
+export type ViewMode = "list" | "map" | "card";
 
 export interface LocationInputProps {
 	onLocationSelect?: (location: LocationData) => void;

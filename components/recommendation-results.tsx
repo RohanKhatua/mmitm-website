@@ -22,6 +22,7 @@ import {
 	ParticipantLocationWithId,
 	EnhancedVenueRecommendation,
 	FilterOptions,
+	ViewMode,
 } from "@/lib/types";
 import {
 	shareVenue,
@@ -36,6 +37,7 @@ interface RecommendationResultsProps {
 	participants: ParticipantLocationWithId[];
 	isLoading: boolean;
 	sessionId?: string;
+	viewMode?: ViewMode;
 }
 
 export function RecommendationResults({
@@ -43,6 +45,7 @@ export function RecommendationResults({
 	participants,
 	isLoading,
 	sessionId,
+	viewMode = "list",
 }: RecommendationResultsProps) {
 	const { toast } = useToast();
 	const [selectedVenue, setSelectedVenue] =
@@ -228,6 +231,192 @@ export function RecommendationResults({
 		return "text-red-600";
 	};
 
+	// Import carousel components
+	const {
+		Carousel,
+		CarouselContent,
+		CarouselItem,
+		CarouselPrevious,
+		CarouselNext,
+	} = require("@/components/ui/carousel");
+
+	const renderVenueCard = (
+		venue: EnhancedVenueRecommendation,
+		index: number
+	) => {
+		const fairnessScore = getFairnessScore(venue);
+		const avgTravelTime =
+			venue.travel_times.reduce((sum, t) => sum + t.travel_time_minutes, 0) /
+			venue.travel_times.length;
+		const priceDisplay = getPriceLevelDisplay(venue.price_level);
+
+		return (
+			<Card
+				key={index}
+				className="border-gray-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 h-full transform will-change-transform card-carousel-effect w-full min-w-0">
+				<CardContent className="p-6 overflow-hidden">
+					<div className="flex justify-between items-start mb-4">
+						<div className="flex-1">
+							<h3 className="font-semibold text-lg text-gray-900 mb-1">
+								{venue.name}
+							</h3>
+							<p className="text-gray-600 text-sm mb-2">{venue.address}</p>
+							<div className="flex flex-wrap items-center gap-2 mt-2">
+								<Badge variant="secondary">{venue.category}</Badge>
+								{priceDisplay && (
+									<Badge className={priceDisplay.color}>
+										{priceDisplay.text}
+									</Badge>
+								)}
+								{fairnessScore <= 5 && (
+									<Badge className="bg-green-100 text-green-800">
+										<Award className="h-3 w-3 mr-1" />
+										Fair Choice
+									</Badge>
+								)}
+							</div>
+						</div>
+						<div className="text-right">
+							{venue.rating && (
+								<div className="flex items-center space-x-1 mb-2">
+									<Star className="h-4 w-4 text-yellow-400 fill-current" />
+									<span className="font-medium">{venue.rating}</span>
+									{venue.reviews && (
+										<span className="text-xs text-gray-500">
+											({venue.reviews})
+										</span>
+									)}
+								</div>
+							)}
+						</div>
+					</div>
+
+					{/* Travel Metrics */}
+					<div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-4 p-3 bg-gray-50 rounded-lg overflow-hidden">
+						<div className="text-center min-w-0">
+							<div className="text-lg font-semibold text-primary truncate">
+								{avgTravelTime.toFixed(1)} min
+							</div>
+							<div className="text-xs text-gray-500">Avg Travel Time</div>
+						</div>
+						<div className="text-center min-w-0">
+							<div
+								className={`text-lg font-semibold ${getFairnessColor(
+									fairnessScore
+								)} truncate`}>
+								{fairnessScore} min
+							</div>
+							<div className="text-xs text-gray-500">Fairness Score</div>
+						</div>
+						<div className="text-center md:block hidden min-w-0">
+							<div className="text-lg font-semibold text-gray-700 truncate">
+								{Math.min(
+									...venue.travel_times.map((t) => t.travel_time_minutes)
+								)}
+								-
+								{Math.max(
+									...venue.travel_times.map((t) => t.travel_time_minutes)
+								)}{" "}
+								min
+							</div>
+							<div className="text-xs text-gray-500">Time Range</div>
+						</div>
+					</div>
+
+					{/* Travel Times Preview */}
+					<div className="space-y-2 mb-4">
+						<h4 className="text-sm font-medium text-gray-700">Travel Times:</h4>
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+							{venue.travel_times.slice(0, 4).map((travelTime) => (
+								<div
+									key={travelTime.participant_index}
+									className="flex items-center justify-between text-sm overflow-hidden">
+									<span className="text-gray-600 truncate mr-1">
+										{participants[travelTime.participant_index]?.name ||
+											`Participant ${travelTime.participant_index + 1}`}
+									</span>
+									<div className="flex items-center gap-1 flex-shrink-0">
+										<Clock className="h-3 w-3 text-gray-400" />
+										<span className="font-medium">
+											{travelTime.travel_time_minutes} min
+										</span>
+									</div>
+								</div>
+							))}
+							{venue.travel_times.length > 4 && (
+								<div className="text-sm text-gray-500 col-span-full">
+									+{venue.travel_times.length - 4} more participants
+								</div>
+							)}
+						</div>
+					</div>
+
+					{/* Action Buttons */}
+					<div className="grid grid-cols-2 gap-2">
+						<Button
+							onClick={() => setSelectedVenue(venue)}
+							variant="outline"
+							size="sm">
+							<TrendingUp className="h-4 w-4 mr-1" />
+							<span className="truncate">Details</span>
+						</Button>
+						<Button
+							size="sm"
+							onClick={() => window.open(venue.google_maps_url, "_blank")}>
+							<ExternalLink className="h-4 w-4 mr-1" />
+							<span className="truncate">Maps</span>
+						</Button>
+						<Button
+							onClick={async () => {
+								const success = await copyVenueToClipboard(venue);
+								if (success) {
+									toast({
+										title: "Copied to clipboard",
+										description:
+											"Venue information has been copied to clipboard",
+										variant: "default",
+									});
+								} else {
+									toast({
+										title: "Copy failed",
+										description: "Unable to copy venue information",
+										variant: "destructive",
+									});
+								}
+							}}
+							variant="outline"
+							size="sm">
+							<Copy className="h-4 w-4 mr-1" />
+							<span className="truncate">Copy</span>
+						</Button>
+						<Button
+							onClick={async () => {
+								const success = await shareVenue(venue);
+								if (success) {
+									toast({
+										title: "Venue shared",
+										description: "Venue shared successfully",
+										variant: "default",
+									});
+								} else {
+									toast({
+										title: "Share failed",
+										description: "Unable to share venue information",
+										variant: "destructive",
+									});
+								}
+							}}
+							variant="secondary"
+							size="sm">
+							<Share className="h-4 w-4 mr-1" />
+							<span className="truncate">Share</span>
+						</Button>
+					</div>
+				</CardContent>
+			</Card>
+		);
+	};
+
 	return (
 		<div className="space-y-6">
 			{/* Filters */}
@@ -308,214 +497,48 @@ export function RecommendationResults({
 					)}
 				</CardHeader>
 				<CardContent>
-					<div className="space-y-4">
-						{filteredRecommendations.map((venue, index) => {
-							const fairnessScore = getFairnessScore(venue);
-							const avgTravelTime =
-								venue.travel_times.reduce(
-									(sum, t) => sum + t.travel_time_minutes,
-									0
-								) / venue.travel_times.length;
-							const priceDisplay = getPriceLevelDisplay(venue.price_level);
-
-							return (
-								<Card
-									key={index}
-									className="border-gray-200 hover:shadow-md transition-shadow duration-200">
-									<CardContent className="p-6">
-										<div className="flex justify-between items-start mb-4">
-											<div className="flex-1">
-												<h3 className="font-semibold text-lg text-gray-900 mb-1">
-													{venue.name}
-												</h3>
-												<p className="text-gray-600 text-sm mb-2">
-													{venue.address}
-												</p>
-												<div className="flex items-center space-x-3">
-													<Badge variant="secondary">{venue.category}</Badge>
-													{priceDisplay && (
-														<Badge className={priceDisplay.color}>
-															{priceDisplay.text}
-														</Badge>
-													)}
-													{fairnessScore <= 5 && (
-														<Badge className="bg-green-100 text-green-800">
-															<Award className="h-3 w-3 mr-1" />
-															Fair Choice
-														</Badge>
-													)}
-												</div>
+					{viewMode === "card" && filteredRecommendations.length > 0 ? (
+						<div className="py-4">
+							<Carousel
+								opts={{
+									loop: filteredRecommendations.length > 3,
+									align: "center",
+									containScroll: "trimSnaps",
+								}}
+								className="w-full">
+								<CarouselContent className="-ml-4 flex-nowrap">
+									{filteredRecommendations.map((venue, index) => (
+										<CarouselItem
+											key={index}
+											className="pl-4 md:basis-full lg:basis-1/2 xl:basis-1/2 perspective-1000 min-w-[320px] w-auto">
+											<div className="group h-full">
+												{renderVenueCard(venue, index)}
 											</div>
-											<div className="text-right">
-												{venue.rating && (
-													<div className="flex items-center space-x-1 mb-2">
-														<Star className="h-4 w-4 text-yellow-400 fill-current" />
-														<span className="font-medium">{venue.rating}</span>
-														{venue.reviews && (
-															<span className="text-xs text-gray-500">
-																({venue.reviews})
-															</span>
-														)}
-													</div>
-												)}
-											</div>
-										</div>
-
-										{/* Travel Metrics */}
-										<div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4 p-3 bg-gray-50 rounded-lg">
-											<div className="text-center">
-												<div className="text-lg font-semibold text-primary">
-													{avgTravelTime.toFixed(1)} min
-												</div>
-												<div className="text-xs text-gray-500">
-													Avg Travel Time
-												</div>
-											</div>
-											<div className="text-center">
-												<div
-													className={`text-lg font-semibold ${getFairnessColor(
-														fairnessScore
-													)}`}>
-													{fairnessScore} min
-												</div>
-												<div className="text-xs text-gray-500">
-													Fairness Score
-												</div>
-											</div>
-											<div className="text-center md:block hidden">
-												<div className="text-lg font-semibold text-gray-700">
-													{Math.min(
-														...venue.travel_times.map(
-															(t) => t.travel_time_minutes
-														)
-													)}
-													-
-													{Math.max(
-														...venue.travel_times.map(
-															(t) => t.travel_time_minutes
-														)
-													)}{" "}
-													min
-												</div>
-												<div className="text-xs text-gray-500">Time Range</div>
-											</div>
-										</div>
-
-										{/* Travel Times Preview */}
-										<div className="space-y-2 mb-4">
-											<h4 className="text-sm font-medium text-gray-700">
-												Travel Times:
-											</h4>
-											<div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-												{venue.travel_times.slice(0, 4).map((travelTime) => (
-													<div
-														key={travelTime.participant_index}
-														className="flex items-center justify-between text-sm">
-														<span className="text-gray-600">
-															{participants[travelTime.participant_index]
-																?.name ||
-																`Participant ${
-																	travelTime.participant_index + 1
-																}`}
-														</span>
-														<div className="flex items-center space-x-2">
-															<Clock className="h-3 w-3 text-gray-400" />
-															<span className="font-medium">
-																{travelTime.travel_time_minutes} min
-															</span>
-														</div>
-													</div>
-												))}
-												{venue.travel_times.length > 4 && (
-													<div className="text-sm text-gray-500 col-span-full">
-														+{venue.travel_times.length - 4} more participants
-													</div>
-												)}
-											</div>
-										</div>
-
-										{/* Action Buttons */}
-										<div className="flex flex-wrap gap-2">
-											<Button
-												onClick={() => setSelectedVenue(venue)}
-												variant="outline"
-												size="sm"
-												className="flex-1">
-												<TrendingUp className="h-4 w-4 mr-2" />
-												View Details
-											</Button>
-											<Button
-												size="sm"
-												onClick={() =>
-													window.open(venue.google_maps_url, "_blank")
-												}
-												className="flex-1">
-												<ExternalLink className="h-4 w-4 mr-2" />
-												View on Maps
-											</Button>
-											<Button
-												onClick={async () => {
-													const success = await copyVenueToClipboard(venue);
-													if (success) {
-														toast({
-															title: "Copied to clipboard",
-															description:
-																"Venue information has been copied to clipboard",
-															variant: "default",
-														});
-													} else {
-														toast({
-															title: "Copy failed",
-															description: "Unable to copy venue information",
-															variant: "destructive",
-														});
-													}
-												}}
-												variant="outline"
-												size="sm"
-												className="flex-1">
-												<Copy className="h-4 w-4 mr-2" />
-												Copy
-											</Button>
-											<Button
-												onClick={async () => {
-													const success = await shareVenue(venue);
-													if (success) {
-														toast({
-															title: "Venue shared",
-															description: "Venue shared successfully",
-															variant: "default",
-														});
-													} else {
-														toast({
-															title: "Share failed",
-															description: "Unable to share venue information",
-															variant: "destructive",
-														});
-													}
-												}}
-												variant="secondary"
-												size="sm"
-												className="flex-1">
-												<Share className="h-4 w-4 mr-2" />
-												Share
-											</Button>
-										</div>
-									</CardContent>
-								</Card>
-							);
-						})}
-
-						{filteredRecommendations.length === 0 && (
-							<div className="text-center py-8 text-gray-500">
-								<MapPin className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-								<p>
-									No venues match your current filters. Try adjusting your
-									criteria.
-								</p>
-							</div>
-						)}
-					</div>
+										</CarouselItem>
+									))}
+								</CarouselContent>
+								<div className="flex justify-center mt-6 gap-2">
+									<CarouselPrevious className="static transform-none position-static" />
+									<CarouselNext className="static transform-none position-static" />
+								</div>
+							</Carousel>
+						</div>
+					) : (
+						<div className="space-y-4">
+							{filteredRecommendations.map((venue, index) =>
+								renderVenueCard(venue, index)
+							)}
+							{filteredRecommendations.length === 0 && (
+								<div className="text-center py-8 text-gray-500">
+									<MapPin className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+									<p>
+										No venues match your current filters. Try adjusting your
+										criteria.
+									</p>
+								</div>
+							)}
+						</div>
+					)}
 				</CardContent>
 			</Card>
 

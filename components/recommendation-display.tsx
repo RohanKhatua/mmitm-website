@@ -20,24 +20,26 @@ export function RecommendationDisplay({
 	isLoading,
 	sessionId,
 }: RecommendationDisplayProps) {
-	const [viewMode, setViewMode] = useState<ViewMode>("list");
+	const [viewMode, setViewMode] = useState<ViewMode>("card");
 
 	return (
-		<div className="w-full h-full flex flex-col">
+		<div className="w-full flex flex-col">
 			{/* View Mode Toggle */}
 			<div className="flex items-center justify-between mb-4">
 				<div className="flex items-center gap-2">
 					<Button
-						onClick={() => setViewMode("list")}
-						variant={viewMode === "list" ? "default" : "outline"}
-						size="sm">
+						onClick={() => setViewMode("card")}
+						variant={viewMode === "card" ? "default" : "outline"}
+						size="sm"
+						className="flex-1">
 						<List className="h-4 w-4 mr-2" />
-						List View
+						Card Deck
 					</Button>
 					<Button
 						onClick={() => setViewMode("map")}
 						variant={viewMode === "map" ? "default" : "outline"}
-						size="sm">
+						size="sm"
+						className="flex-1">
 						<MapPin className="h-4 w-4 mr-2" />
 						Map View
 					</Button>
@@ -46,12 +48,13 @@ export function RecommendationDisplay({
 
 			{/* Content */}
 			<div className="flex-1">
-				{viewMode === "list" && (
+				{viewMode === "card" && (
 					<RecommendationResults
 						recommendations={recommendations}
 						participants={participants}
 						isLoading={isLoading}
 						sessionId={sessionId}
+						viewMode="card"
 					/>
 				)}
 				{viewMode === "map" && (
@@ -59,7 +62,7 @@ export function RecommendationDisplay({
 						recommendations={recommendations}
 						participants={participants}
 						isLoading={isLoading}
-						className="h-full"
+						className="h-[70vh]"
 					/>
 				)}
 			</div>

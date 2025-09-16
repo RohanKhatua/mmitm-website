@@ -117,9 +117,10 @@ export default function InstantRecommendationsPage() {
 					onPreferencesChangeAction={setPreferences}
 				/>
 
-				<div className="grid lg:grid-cols-2 gap-8">
-					{/* Input Section */}
-					<div className="space-y-6">
+				{/* Flexible Layout for both Desktop and Mobile */}
+				<div className="flex flex-col lg:flex-row gap-8">
+					{/* Input Section - Fixed Width on Desktop */}
+					<div className="lg:w-5/12 space-y-6">
 						{/* Participants */}
 						<Card>
 							<CardHeader>
@@ -131,7 +132,7 @@ export default function InstantRecommendationsPage() {
 									</Button>
 								</CardTitle>
 							</CardHeader>
-							<CardContent className="space-y-4">
+							<CardContent className="space-y-4 max-h-[60vh] overflow-y-auto">
 								{participants.map((participant) => (
 									<div key={participant.id} className="border rounded-lg p-4">
 										<div className="flex items-center justify-between mb-3">
@@ -183,14 +184,16 @@ export default function InstantRecommendationsPage() {
 						)}
 					</div>
 
-					{/* Results Section */}
-					<div>
-						<RecommendationDisplay
-							recommendations={recommendations}
-							participants={participants}
-							isLoading={isLoading}
-							sessionId={undefined}
-						/>
+					{/* Results Section - Expanded/Flexible Width on Desktop */}
+					<div className="lg:w-7/12 lg:flex-1">
+						<div className="sticky top-24">
+							<RecommendationDisplay
+								recommendations={recommendations}
+								participants={participants}
+								isLoading={isLoading}
+								sessionId={undefined}
+							/>
+						</div>
 					</div>
 				</div>
 			</div>
