@@ -5,7 +5,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { VenueDetailModal } from "@/components/venue-detail-modal";
-import { RecommendationFilters } from "@/components/recommendation-filters";
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 import {
 	MapPin,
 	Star,
@@ -17,6 +29,8 @@ import {
 	CheckCircle2,
 	AlertCircle,
 	Copy,
+	Filter,
+	X,
 } from "lucide-react";
 import {
 	ParticipantLocationWithId,
@@ -240,6 +254,11 @@ export function RecommendationResults({
 		CarouselNext,
 	} = require("@/components/ui/carousel");
 
+	const updateFilters = (newFilters: Partial<FilterOptions>) => {
+		const updatedFilters = { ...filters, ...newFilters };
+		setFilters(updatedFilters);
+	};
+
 	const renderVenueCard = (
 		venue: EnhancedVenueRecommendation,
 		index: number
@@ -417,84 +436,316 @@ export function RecommendationResults({
 		);
 	};
 
+	const hasActiveFilters =
+		filters.categoryFilter.length > 0 ||
+		filters.priceFilter.length > 0 ||
+		filters.minRating > 0 ||
+		filters.maxTravelTime < 60;
+
 	return (
 		<div className="space-y-6">
-			{/* Filters */}
-			<RecommendationFilters
-				onFiltersChange={setFilters}
-				categories={categories}
-				priceRange={priceRange}
-				ratingRange={ratingRange}
-			/>
-
-			{/* Results */}
+			{/* Results with Integrated Filters */}
 			<Card>
-				<CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between md:space-x-2 space-y-4 md:space-y-0">
-					<CardTitle>
-						Venue Recommendations ({filteredRecommendations.length}
-						{filteredRecommendations.length !== recommendations.length &&
-							` of ${recommendations.length}`}
-						)
-					</CardTitle>
-					{filteredRecommendations.length > 0 && (
-						<div className="flex items-center gap-2">
-							<Button
-								variant="outline"
-								size="sm"
-								onClick={async () => {
-									const success = await copyRecommendationSetToClipboard(
-										filteredRecommendations,
-										sessionId
-									);
-									if (success) {
-										toast({
-											title: "Copied to clipboard",
-											description:
-												"The list of recommendations has been copied to clipboard",
-											variant: "default",
-										});
-									} else {
-										toast({
-											title: "Copy failed",
-											description: "Unable to copy recommendations",
-											variant: "destructive",
-										});
-									}
-								}}
-								className="flex items-center gap-1 whitespace-nowrap">
-								<Copy className="h-4 w-4 mr-1" />
-								<span className="md:inline hidden">Copy List</span>
-								<span className="md:hidden inline">Copy</span>
-							</Button>
-							<Button
-								variant="secondary"
-								size="sm"
-								onClick={async () => {
-									const success = await shareRecommendationSet(
-										filteredRecommendations,
-										sessionId
-									);
-									if (success) {
-										toast({
-											title: "Recommendations shared",
-											description: "Recommendations shared successfully",
-											variant: "default",
-										});
-									} else {
-										toast({
-											title: "Share failed",
-											description: "Unable to share recommendations",
-											variant: "destructive",
-										});
-									}
-								}}
-								className="flex items-center gap-1 whitespace-nowrap">
-								<Share className="h-4 w-4 mr-1" />
-								<span className="md:inline hidden">Share All</span>
-								<span className="md:hidden inline">Share</span>
-							</Button>
-						</div>
-					)}
+				<CardHeader className="flex flex-col space-y-4">
+					<div className="flex flex-col md:flex-row items-start md:items-center justify-between md:space-x-2 space-y-4 md:space-y-0">
+						<CardTitle>
+							Venue Recommendations ({filteredRecommendations.length}
+							{filteredRecommendations.length !== recommendations.length &&
+								` of ${recommendations.length}`}
+							)
+						</CardTitle>
+						{filteredRecommendations.length > 0 && (
+							<div className="flex items-center gap-2">
+								<Button
+									variant="outline"
+									size="sm"
+									onClick={async () => {
+										const success = await copyRecommendationSetToClipboard(
+											filteredRecommendations,
+											sessionId
+										);
+										if (success) {
+											toast({
+												title: "Copied to clipboard",
+												description:
+													"The list of recommendations has been copied to clipboard",
+												variant: "default",
+											});
+										} else {
+											toast({
+												title: "Copy failed",
+												description: "Unable to copy recommendations",
+												variant: "destructive",
+											});
+										}
+									}}
+									className="flex items-center gap-1 whitespace-nowrap">
+									<Copy className="h-4 w-4 mr-1" />
+									<span className="md:inline hidden">Copy List</span>
+									<span className="md:hidden inline">Copy</span>
+								</Button>
+								<Button
+									variant="secondary"
+									size="sm"
+									onClick={async () => {
+										const success = await shareRecommendationSet(
+											filteredRecommendations,
+											sessionId
+										);
+										if (success) {
+											toast({
+												title: "Recommendations shared",
+												description: "Recommendations shared successfully",
+												variant: "default",
+											});
+										} else {
+											toast({
+												title: "Share failed",
+												description: "Unable to share recommendations",
+												variant: "destructive",
+											});
+										}
+									}}
+									className="flex items-center gap-1 whitespace-nowrap">
+									<Share className="h-4 w-4 mr-1" />
+									<span className="md:inline hidden">Share All</span>
+									<span className="md:hidden inline">Share</span>
+								</Button>
+							</div>
+						)}
+					</div>
+
+					{/* Compact Filter UI */}
+					<div className="flex flex-wrap items-center gap-2 pt-2">
+						{/* Quick Sort */}
+						<Select
+							value={filters.sortBy}
+							onValueChange={(value: string) =>
+								updateFilters({
+									sortBy: value as
+										| "fairness"
+										| "rating"
+										| "travel_time"
+										| "reviews",
+								})
+							}>
+							<SelectTrigger className="w-auto h-8 text-xs">
+								<SelectValue placeholder="Sort by" />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="fairness">Fairness Score</SelectItem>
+								<SelectItem value="rating">Rating</SelectItem>
+								<SelectItem value="travel_time">Avg Travel Time</SelectItem>
+								<SelectItem value="reviews">Reviews</SelectItem>
+							</SelectContent>
+						</Select>
+
+						{/* Order */}
+						<Select
+							value={filters.sortOrder}
+							onValueChange={(value: string) =>
+								updateFilters({ sortOrder: value as "asc" | "desc" })
+							}>
+							<SelectTrigger className="w-auto h-8 text-xs">
+								<SelectValue placeholder="Order" />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="asc">
+									{filters.sortBy === "fairness" ||
+									filters.sortBy === "travel_time"
+										? "Best First"
+										: "Low to High"}
+								</SelectItem>
+								<SelectItem value="desc">
+									{filters.sortBy === "fairness" ||
+									filters.sortBy === "travel_time"
+										? "Worst First"
+										: "High to Low"}
+								</SelectItem>
+							</SelectContent>
+						</Select>
+
+						{/* All Filters Popover */}
+						<Popover>
+							<PopoverTrigger asChild>
+								<Button variant="outline" size="sm" className="h-8 gap-1">
+									<Filter className="h-3 w-3" />
+									Filters
+									{hasActiveFilters && (
+										<Badge
+											variant="secondary"
+											className="h-5 w-5 p-0 flex items-center justify-center rounded-full">
+											{filters.categoryFilter.length +
+												filters.priceFilter.length +
+												(filters.minRating > 0 ? 1 : 0) +
+												(filters.maxTravelTime < 60 ? 1 : 0)}
+										</Badge>
+									)}
+								</Button>
+							</PopoverTrigger>
+							<PopoverContent className="w-80 p-4" align="end">
+								<div className="space-y-4">
+									{/* Category Filter */}
+									<div>
+										<h4 className="text-sm font-medium mb-2">Categories</h4>
+										<div className="flex flex-wrap gap-1 max-h-24 overflow-y-auto">
+											{categories.map((category) => (
+												<Badge
+													key={category}
+													variant={
+														filters.categoryFilter.includes(category)
+															? "default"
+															: "outline"
+													}
+													className="cursor-pointer text-xs"
+													onClick={() => {
+														const newCategories =
+															filters.categoryFilter.includes(category)
+																? filters.categoryFilter.filter(
+																		(c) => c !== category
+																  )
+																: [...filters.categoryFilter, category];
+														updateFilters({ categoryFilter: newCategories });
+													}}>
+													{category}
+												</Badge>
+											))}
+										</div>
+									</div>
+
+									{/* Price Filter */}
+									<div>
+										<h4 className="text-sm font-medium mb-2">Price Range</h4>
+										<div className="flex gap-1">
+											{[
+												{ value: "PRICE_LEVEL_FREE", label: "Free" },
+												{ value: "PRICE_LEVEL_INEXPENSIVE", label: "$" },
+												{ value: "PRICE_LEVEL_MODERATE", label: "$$" },
+												{ value: "PRICE_LEVEL_EXPENSIVE", label: "$$$" },
+												{ value: "PRICE_LEVEL_VERY_EXPENSIVE", label: "$$$$" },
+											].map((price) => (
+												<Badge
+													key={price.value}
+													variant={
+														filters.priceFilter.includes(price.value)
+															? "default"
+															: "outline"
+													}
+													className="cursor-pointer"
+													onClick={() => {
+														const newPrices = filters.priceFilter.includes(
+															price.value
+														)
+															? filters.priceFilter.filter(
+																	(p) => p !== price.value
+															  )
+															: [...filters.priceFilter, price.value];
+														updateFilters({ priceFilter: newPrices });
+													}}>
+													{price.label}
+												</Badge>
+											))}
+										</div>
+									</div>
+
+									{/* Rating Filter */}
+									<div>
+										<h4 className="text-sm font-medium mb-2">
+											Min Rating: {filters.minRating.toFixed(1)}
+										</h4>
+										<div className="px-1">
+											<Slider
+												value={[filters.minRating]}
+												onValueChange={([value]) =>
+													updateFilters({ minRating: value })
+												}
+												min={ratingRange[0]}
+												max={ratingRange[1]}
+												step={0.1}
+												className="w-full"
+											/>
+										</div>
+									</div>
+
+									{/* Max Travel Time */}
+									<div>
+										<h4 className="text-sm font-medium mb-2">
+											Max Travel Time: {filters.maxTravelTime} min
+										</h4>
+										<div className="px-1">
+											<Slider
+												value={[filters.maxTravelTime]}
+												onValueChange={([value]) =>
+													updateFilters({ maxTravelTime: value })
+												}
+												min={5}
+												max={120}
+												step={5}
+												className="w-full"
+											/>
+										</div>
+									</div>
+
+									{/* Reset Button */}
+									{hasActiveFilters && (
+										<Button
+											onClick={() => {
+												const defaultFilters: FilterOptions = {
+													sortBy: "fairness",
+													sortOrder: "asc",
+													categoryFilter: [],
+													priceFilter: [],
+													minRating: 0,
+													maxTravelTime: 60,
+												};
+												setFilters(defaultFilters);
+											}}
+											variant="ghost"
+											size="sm"
+											className="w-full mt-2">
+											<X className="h-4 w-4 mr-1" />
+											Reset All Filters
+										</Button>
+									)}
+								</div>
+							</PopoverContent>
+						</Popover>
+
+						{/* Active Filters Display */}
+						{hasActiveFilters && (
+							<div className="flex flex-wrap gap-1 ml-1">
+								{filters.categoryFilter.slice(0, 1).map((category) => (
+									<Badge
+										key={category}
+										variant="secondary"
+										className="h-8 text-xs px-2">
+										{category}
+										<button
+											className="ml-1 hover:text-destructive"
+											onClick={() => {
+												updateFilters({
+													categoryFilter: filters.categoryFilter.filter(
+														(c) => c !== category
+													),
+												});
+											}}>
+											×
+										</button>
+									</Badge>
+								))}
+								{filters.categoryFilter.length > 1 && (
+									<Badge variant="secondary" className="h-8 text-xs px-2">
+										+{filters.categoryFilter.length - 1} categories
+									</Badge>
+								)}
+								{filters.minRating > 0 && (
+									<Badge variant="secondary" className="h-8 text-xs px-2">
+										{filters.minRating.toFixed(1)}+ stars
+									</Badge>
+								)}
+							</div>
+						)}
+					</div>
 				</CardHeader>
 				<CardContent>
 					{viewMode === "card" && filteredRecommendations.length > 0 ? (
